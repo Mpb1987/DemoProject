@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DemoProject.ApplicationCore.DTO;
+﻿using DemoProject.ApplicationCore.DTO;
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -92,7 +87,8 @@ namespace DemoProject.ApplicationCore.Services
                 currentOrder.ProductId = order.ProductId;
                 await _orderRepository.UpdateAsync(currentOrder);
 
-                return currentOrder;
+                var record = await _orderRepository.FindByReadOnlyAsync(x => x.Id == id, i => i.Customer, i => i.Product);
+                return record.First();
 
             }
             catch (Exception ex)

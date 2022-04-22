@@ -16,13 +16,13 @@ namespace DemoProject.Tests.Services
     public class CustomerServiceTests
     {
         private readonly Mock<ILogger<CustomerService>> _loggerMock = new();
-        public readonly Mock<IBaseRepository<Customer>> CustomerRepoMock = new();
+        private readonly Mock<IBaseRepository<Customer>> _customerRepoMock = new();
 
         private readonly CustomerService _customerService;
 
         public CustomerServiceTests()
         {
-            _customerService = new CustomerService(_loggerMock.Object, CustomerRepoMock.Object);
+            _customerService = new CustomerService(_loggerMock.Object, _customerRepoMock.Object);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace DemoProject.Tests.Services
         {
             //Arrange
             //Act
-            var sut = Assert.Throws<ArgumentNullException>(() => new CustomerService(null, CustomerRepoMock.Object));
+            var sut = Assert.Throws<ArgumentNullException>(() => new CustomerService(null, _customerRepoMock.Object));
             //Assert
             Assert.Equal("Value cannot be null. (Parameter 'logger')", sut.Message);
         }
@@ -50,7 +50,7 @@ namespace DemoProject.Tests.Services
         public async Task GetCustomers_success()
         {
             //Arrange
-            CustomerRepoMock.Setup(x => x.ListAllAsync()).ReturnsAsync(CustomerData.GetCustomers());
+            _customerRepoMock.Setup(x => x.ListAllAsync()).ReturnsAsync(CustomerData.GetCustomers());
             //Act
             var sut = await _customerService.GetCustomers();
             //Assert
@@ -62,7 +62,7 @@ namespace DemoProject.Tests.Services
         {
             //Arrange
             var customer = CustomerData.GetCustomers().First();
-            CustomerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(customer);
+            _customerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(customer);
             //Act
             var sut = await _customerService.GetCustomer(1);
             //Assert
@@ -87,7 +87,7 @@ namespace DemoProject.Tests.Services
                 Surname = "DTO"
             };
 
-            CustomerRepoMock.Setup(x => x.AddAsync(It.IsAny<Customer>())).ReturnsAsync(newCustomer);
+            _customerRepoMock.Setup(x => x.AddAsync(It.IsAny<Customer>())).ReturnsAsync(newCustomer);
 
             //Act
             var sut = await _customerService.AddCustomer(newCustomerDto);
@@ -113,8 +113,8 @@ namespace DemoProject.Tests.Services
                 Surname = "customer"
             };
 
-            CustomerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(CustomerData.GetCustomers()[0]);
-            CustomerRepoMock.Setup(x => x.UpdateAsync(It.IsAny<Customer>())).Returns(Task.CompletedTask);
+            _customerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(CustomerData.GetCustomers()[0]);
+            _customerRepoMock.Setup(x => x.UpdateAsync(It.IsAny<Customer>())).Returns(Task.CompletedTask);
 
             //Act
             var sut = await _customerService.UpdateCustomer(1, updateCustomerDto);
@@ -132,7 +132,7 @@ namespace DemoProject.Tests.Services
                 FirstName = "changing",
                 Surname = "customer"
             };
-            CustomerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).Throws(new Exception());
+            _customerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).Throws(new Exception());
 
             //Act
             Func<Task> sut = async () => await _customerService.UpdateCustomer(1, updateCustomerDto);
@@ -152,13 +152,13 @@ namespace DemoProject.Tests.Services
         {
             //Arrange
             var customer = CustomerData.GetCustomers().First();
-            CustomerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(customer);
-            CustomerRepoMock.Setup(x => x.DeleteAsync(It.IsAny<Customer>())).Returns(Task.CompletedTask);
+            _customerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(customer);
+            _customerRepoMock.Setup(x => x.DeleteAsync(It.IsAny<Customer>())).Returns(Task.CompletedTask);
 
             //Act
             await _customerService.DeleteCustomer(1);
             //Assert
-            CustomerRepoMock.Verify(x=>x.DeleteAsync(It.IsAny<Customer>()),Times.Once);
+            _customerRepoMock.Verify(x=>x.DeleteAsync(It.IsAny<Customer>()),Times.Once);
         }
     }
 }
