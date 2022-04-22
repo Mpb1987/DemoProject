@@ -2,6 +2,7 @@
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,7 +26,8 @@ namespace DemoProject.Api.Controllers
         public async Task<List<Order>> Get()
         {
             var result = await _orderService.GetOrders();
-            _logger.LogInformation($"Get order list: {result}");
+            _logger.LogInformation($"Get order list count: {result.Count}");
+            _logger.LogInformation($"Get order list: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -34,7 +36,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Order> Get(int id)
         {
             var result = await _orderService.GetOrder(id);
-            _logger.LogInformation($"Get order by id: {result}");
+            _logger.LogInformation($"Get order by id: {JsonConvert.SerializeObject(result)}");
             
             return result;
         }
@@ -44,7 +46,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Order> Post([FromBody] OrderDto order)
         {
             var result = await _orderService.AddOrder(order);
-            _logger.LogInformation($"Post order: {result}");
+            _logger.LogInformation($"Post order: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -53,7 +55,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Order?> Put(int id, [FromBody] OrderDto order)
         {
             var updatedOrder = await _orderService.UpdateOrder(id, order);
-            _logger.LogInformation($"Put order: {updatedOrder}");
+            _logger.LogInformation($"Put order: {JsonConvert.SerializeObject(updatedOrder)}");
 
             return updatedOrder;
         }

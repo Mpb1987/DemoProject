@@ -2,6 +2,7 @@
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,7 +26,8 @@ namespace DemoProject.Api.Controllers
         public async Task<List<Customer>> Get()
         {
             var result= await _customerService.GetCustomers();
-            _logger.LogInformation($"Get customer list: {result}");
+            _logger.LogInformation($"Get customer list count: {result.Count}");
+            _logger.LogInformation($"Get customer list: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -34,7 +36,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Customer> Get(int id)
         {
             var result = await _customerService.GetCustomer(id);
-            _logger.LogInformation($"Get customer by id: {result}");
+            _logger.LogInformation($"Get customer by id: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -43,7 +45,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Customer> Post([FromBody] CustomerDto customer)
         {
             var result = await _customerService.AddCustomer(customer);
-            _logger.LogInformation($"Post customer: {result}");
+            _logger.LogInformation($"Post customer: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -52,7 +54,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Customer?> Put(int id, [FromBody] CustomerDto customer)
         {
             var updatedCustomer = await _customerService.UpdateCustomer(id, customer);
-            _logger.LogInformation($"Put customer: {updatedCustomer}");
+            _logger.LogInformation($"Put customer: {JsonConvert.SerializeObject(updatedCustomer)}");
 
             return updatedCustomer;
         }

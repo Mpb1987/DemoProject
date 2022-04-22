@@ -2,6 +2,7 @@
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,7 +26,8 @@ namespace DemoProject.Api.Controllers
         public async Task<List<Product>> Get()
         {
             var result = await _productService.GetProducts();
-            _logger.LogInformation($"Get Product list: {result}");
+            _logger.LogInformation($"Get Product list count: {result.Count}");
+            _logger.LogInformation($"Get Product list: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -34,7 +36,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Product> Get(int id)
         {
             var result = await _productService.GetProduct(id);
-            _logger.LogInformation($"Get Product by id: {result}");
+            _logger.LogInformation($"Get Product by id: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -43,7 +45,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Product> Post([FromBody] string description)
         {
             var result = await _productService.AddProduct(description);
-            _logger.LogInformation($"Post Product: {result}");
+            _logger.LogInformation($"Post Product: {JsonConvert.SerializeObject(result)}");
             return result;
         }
 
@@ -52,7 +54,7 @@ namespace DemoProject.Api.Controllers
         public async Task<Product?> Put(int id, [FromBody] string description)
         {
             var updatedProduct = await _productService.UpdateProduct(id, description);
-            _logger.LogInformation($"Put Product: {updatedProduct}");
+            _logger.LogInformation($"Put Product: {JsonConvert.SerializeObject(updatedProduct)}");
             return updatedProduct;
         }
 
