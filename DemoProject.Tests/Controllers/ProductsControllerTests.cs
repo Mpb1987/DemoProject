@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DemoProject.Api.Controllers;
@@ -6,6 +7,7 @@ using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using DemoProject.Tests.Helpers;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -42,9 +44,11 @@ namespace DemoProject.Tests.Controllers
             //Arrange
             _productServiceMock.Setup(x => x.GetProducts()).ReturnsAsync(ProductData.GetProducts());
             //Act
-            var sut = await _controller.Get();
+            var okObjectResult = await _controller.Get() as OkObjectResult;
+            var sut = okObjectResult.Value as List<Product>;
 
             //Assert
+            okObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(ProductData.GetProducts());
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -58,13 +62,15 @@ namespace DemoProject.Tests.Controllers
         public async Task Get_by_id_successAsync()
         {
             //Arrange
-            var Product = ProductData.GetProducts().First();
-            _productServiceMock.Setup(x => x.GetProduct(It.IsAny<int>())).ReturnsAsync(Product);
+            var product = ProductData.GetProducts().First();
+            _productServiceMock.Setup(x => x.GetProduct(It.IsAny<int>())).ReturnsAsync(product);
             //Act
-            var sut = await _controller.Get(1);
+            var okObjectResult = await _controller.Get(1) as OkObjectResult;
+            var sut = okObjectResult.Value as Product;
 
             //Assert
-            sut.Should().BeEquivalentTo(Product);
+            okObjectResult.Should().NotBeNull();
+            sut.Should().BeEquivalentTo(product);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
                 It.IsAny<EventId>(),
@@ -85,9 +91,11 @@ namespace DemoProject.Tests.Controllers
 
             _productServiceMock.Setup(x => x.AddProduct(It.IsAny<string>())).ReturnsAsync(newProduct);
             //Act
-            var sut = await _controller.Post("new product");
+            var createdObjectResult = await _controller.Post("new product") as ObjectResult;
+            var sut = createdObjectResult.Value as Product;
 
             //Assert
+            createdObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(newProduct);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -102,18 +110,21 @@ namespace DemoProject.Tests.Controllers
         {
             //Arrange
 
-            Product Product = new()
+            Product product = new()
             {
                 ProductId = 4,
                 ProductDescription = "update product"
             };
 
-            _productServiceMock.Setup(x => x.UpdateProduct(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(Product);
+            _productServiceMock.Setup(x => x.UpdateProduct(It.IsAny<int>(), It.IsAny<string>())).ReturnsAsync(product);
             //Act
-            var sut = await _controller.Put(4, "update product");
+            var okObjectResult = await _controller.Put(4, "update product") as OkObjectResult;
+            var sut = okObjectResult.Value as Product;
+
 
             //Assert
-            sut.Should().BeEquivalentTo(Product);
+            okObjectResult.Should().NotBeNull();
+            sut.Should().BeEquivalentTo(product);
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
@@ -125,10 +136,11 @@ namespace DemoProject.Tests.Controllers
         {
             //Arrange
             _productServiceMock.Setup(x => x.DeleteProduct(It.IsAny<int>())).Returns(Task.CompletedTask);
+
             //Act
             var res = _controller.Delete(1);
+
             //Assert
-            //Assert.Equal(TaskStatus.RanToCompletion, res.Status);
             res.Status.Should().Be(TaskStatus.RanToCompletion);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,

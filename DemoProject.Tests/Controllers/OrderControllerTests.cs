@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DemoProject.Api.Controllers;
@@ -7,6 +8,7 @@ using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using DemoProject.Tests.Helpers;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -43,9 +45,11 @@ namespace DemoProject.Tests.Controllers
             //Arrange
             OrderServiceMock.Setup(x => x.GetOrders()).ReturnsAsync(OrderData.GetOrders());
             //Act
-            var sut = await _controller.Get();
+            var okObjectResult = await _controller.Get() as OkObjectResult;
+            var sut = okObjectResult.Value as List<Order>;
 
             //Assert
+            okObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(OrderData.GetOrders());
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -59,13 +63,15 @@ namespace DemoProject.Tests.Controllers
         public async Task Get_by_id_successAsync()
         {
             //Arrange
-            var Order = OrderData.GetOrders().First();
-            OrderServiceMock.Setup(x => x.GetOrder(It.IsAny<int>())).ReturnsAsync(Order);
+            var order = OrderData.GetOrders().First();
+            OrderServiceMock.Setup(x => x.GetOrder(It.IsAny<int>())).ReturnsAsync(order);
             //Act
-            var sut = await _controller.Get(1);
+            var okObjectResult = await _controller.Get(1) as OkObjectResult;
+            var sut = okObjectResult.Value as Order;
 
             //Assert
-            sut.Should().BeEquivalentTo(Order);
+            okObjectResult.Should().NotBeNull();
+            sut.Should().BeEquivalentTo(order);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
                 It.IsAny<EventId>(),
@@ -93,9 +99,11 @@ namespace DemoProject.Tests.Controllers
 
             OrderServiceMock.Setup(x => x.AddOrder(It.IsAny<OrderDto>())).ReturnsAsync(newOrder);
             //Act
-            var sut = await _controller.Post(newOrderDto);
+            var createdObjectResult = await _controller.Post(newOrderDto) as ObjectResult;
+            var sut = createdObjectResult.Value as Order;
 
             //Assert
+            createdObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(newOrder);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -115,19 +123,22 @@ namespace DemoProject.Tests.Controllers
                 ProductId = 3
             };
 
-            Order Order = new()
+            Order order = new()
             {
                 Id = 4,
                 CustomerId = 1,
                 ProductId = 3
             };
 
-            OrderServiceMock.Setup(x => x.UpdateOrder(It.IsAny<int>(), It.IsAny<OrderDto>())).ReturnsAsync(Order);
+            OrderServiceMock.Setup(x => x.UpdateOrder(It.IsAny<int>(), It.IsAny<OrderDto>())).ReturnsAsync(order);
             //Act
-            var sut = await _controller.Put(4, updateOrderDto);
+            var okObjectResult = await _controller.Put(4, updateOrderDto) as OkObjectResult;
+            var sut = okObjectResult.Value as Order;
+
 
             //Assert
-            sut.Should().BeEquivalentTo(Order);
+            okObjectResult.Should().NotBeNull();
+            sut.Should().BeEquivalentTo(order);
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
@@ -139,10 +150,11 @@ namespace DemoProject.Tests.Controllers
         {
             //Arrange
             OrderServiceMock.Setup(x => x.DeleteOrder(It.IsAny<int>())).Returns(Task.CompletedTask);
+
             //Act
             var res = _controller.Delete(1);
+
             //Assert
-            //Assert.Equal(TaskStatus.RanToCompletion, res.Status);
             res.Status.Should().Be(TaskStatus.RanToCompletion);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,

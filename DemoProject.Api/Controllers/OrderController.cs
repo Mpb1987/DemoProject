@@ -1,4 +1,5 @@
-﻿using DemoProject.ApplicationCore.DTO;
+﻿using System.Net.Mime;
+using DemoProject.ApplicationCore.DTO;
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -23,49 +24,67 @@ namespace DemoProject.Api.Controllers
 
         // GET: api/<OrderController>
         [HttpGet]
-        public async Task<List<Order>> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Order>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
         {
-            var result = await _orderService.GetOrders();
-            _logger.LogInformation($"Get order list count: {result.Count}");
-            _logger.LogInformation($"Get order list: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var orders = await _orderService.GetOrders();
+
+            if (orders.Count <= 0) return NotFound();
+
+            _logger.LogInformation($"Get order list count: {orders.Count}");
+            _logger.LogInformation($"Get order list: {JsonConvert.SerializeObject(orders)}");
+            return Ok(orders);
         }
 
         // GET api/<OrderController>/5
         [HttpGet("{id}")]
-        public async Task<Order> Get(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Order))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
         {
-            var result = await _orderService.GetOrder(id);
-            _logger.LogInformation($"Get order by id: {JsonConvert.SerializeObject(result)}");
-            
-            return result;
+            var order = await _orderService.GetOrder(id);
+            if (order == null) return NotFound();
+
+            _logger.LogInformation($"Get order by id: {JsonConvert.SerializeObject(order)}");
+            return Ok(order);
         }
 
         // POST api/<OrderController>
         [HttpPost]
-        public async Task<Order> Post([FromBody] OrderDto order)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Order))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Post([FromBody] OrderDto order)
         {
-            var result = await _orderService.AddOrder(order);
-            _logger.LogInformation($"Post order: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var createdOrder = await _orderService.AddOrder(order);
+            if (createdOrder == null) return BadRequest();
+
+            _logger.LogInformation($"Post order: {JsonConvert.SerializeObject(createdOrder)}");
+            return StatusCode(StatusCodes.Status201Created, createdOrder);
         }
 
         // PUT api/<OrderController>/5
         [HttpPut("{id}")]
-        public async Task<Order?> Put(int id, [FromBody] OrderDto order)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Customer))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Put(int id, [FromBody] OrderDto order)
         {
             var updatedOrder = await _orderService.UpdateOrder(id, order);
-            _logger.LogInformation($"Put order: {JsonConvert.SerializeObject(updatedOrder)}");
+            if (updatedOrder == null) return BadRequest();
 
-            return updatedOrder;
+            _logger.LogInformation($"Put order: {JsonConvert.SerializeObject(updatedOrder)}");
+            return Ok(updatedOrder);
         }
 
         // DELETE api/<OrderController>/5
         [HttpDelete("{id}")]
-        public async  Task Delete(int id)
+        public async  Task<IActionResult> Delete(int id)
         {
             await _orderService.DeleteOrder(id);
             _logger.LogInformation($"Order Deleted id:{id}");
+            return Ok();
         }
     }
 }

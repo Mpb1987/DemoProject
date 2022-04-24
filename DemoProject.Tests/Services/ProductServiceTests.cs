@@ -111,17 +111,16 @@ namespace DemoProject.Tests.Services
             sut.Should().BeEquivalentTo(updateProduct);
         }
 
-        [Fact]
-        public async Task UpdateProduct_throws_exception()
+        [Fact] public async Task UpdateProduct_returns_null()
         {
             //Arrange
             _productRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).Throws(new Exception());
 
             //Act
-            Func<Task> sut = async () => await _productService.UpdateProduct(1, "Update product");
+           var sut =await _productService.UpdateProduct(1, "Update product");
 
             //Assert
-            await sut.Should().ThrowAsync<Exception>();
+            sut.Should().BeNull();
 
             _loggerMock.Verify(x => x.Log(LogLevel.Error,
                 It.IsAny<EventId>(),

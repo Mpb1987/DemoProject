@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DemoProject.Api.Controllers;
@@ -7,6 +8,7 @@ using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using DemoProject.Tests.Helpers;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Moq;
@@ -43,10 +45,13 @@ namespace DemoProject.Tests.Controllers
         {
             //Arrange
             _customerServiceMock.Setup(x => x.GetCustomers()).ReturnsAsync(CustomerData.GetCustomers());
+            
             //Act
-            var sut = await _controller.Get();
+            var okObjectResult = await _controller.Get() as OkObjectResult;
+            var sut = okObjectResult.Value as List<Customer>;
 
             //Assert
+            okObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(CustomerData.GetCustomers());
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -62,10 +67,13 @@ namespace DemoProject.Tests.Controllers
             //Arrange
             var customer = CustomerData.GetCustomers().First();
             _customerServiceMock.Setup(x => x.GetCustomer(It.IsAny<int>())).ReturnsAsync(customer);
+            
             //Act
-            var sut = await _controller.Get(1);
+            var okObjectResult = await _controller.Get(1) as OkObjectResult;
+            var sut = okObjectResult.Value as Customer;
 
             //Assert
+            okObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(customer);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -93,10 +101,13 @@ namespace DemoProject.Tests.Controllers
             };
 
             _customerServiceMock.Setup(x => x.AddCustomer(It.IsAny<CustomerDto>())).ReturnsAsync(newCustomer);
+            
             //Act
-            var sut = await _controller.Post(newCustomerDto);
-
+            var createdObjectResult = await _controller.Post(newCustomerDto) as ObjectResult;
+            var sut = createdObjectResult.Value as Customer;
+            
             //Assert
+            createdObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(newCustomer);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
@@ -124,10 +135,14 @@ namespace DemoProject.Tests.Controllers
             };
 
             _customerServiceMock.Setup(x => x.UpdateCustomer(It.IsAny<int>(),It.IsAny<CustomerDto>())).ReturnsAsync(customer);
+            
             //Act
-            var sut = await _controller.Put(4,updateCustomerDto);
+            var okObjectResult = await _controller.Put(4, updateCustomerDto) as OkObjectResult;
+            var sut = okObjectResult.Value as Customer;
+
 
             //Assert
+            okObjectResult.Should().NotBeNull();
             sut.Should().BeEquivalentTo(customer);
             _loggerMock.Verify(x => x.Log(LogLevel.Information,
                 It.IsAny<EventId>(),
@@ -140,10 +155,11 @@ namespace DemoProject.Tests.Controllers
         {
             //Arrange
             _customerServiceMock.Setup(x => x.DeleteCustomer(It.IsAny<int>())).Returns(Task.CompletedTask);
+
             //Act
             var res = _controller.Delete(1);
+
             //Assert
-            //Assert.Equal(TaskStatus.RanToCompletion, res.Status);
             res.Status.Should().Be(TaskStatus.RanToCompletion);
 
             _loggerMock.Verify(x => x.Log(LogLevel.Information,

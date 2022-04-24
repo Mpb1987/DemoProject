@@ -1,4 +1,5 @@
-﻿using DemoProject.ApplicationCore.DTO;
+﻿using System.Net.Mime;
+using DemoProject.ApplicationCore.DTO;
 using DemoProject.ApplicationCore.Entities;
 using DemoProject.ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -23,48 +24,74 @@ namespace DemoProject.Api.Controllers
 
         // GET: api/<CustomerController>
         [HttpGet]
-        public async Task<List<Customer>> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Customer>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
         {
-            var result= await _customerService.GetCustomers();
-            _logger.LogInformation($"Get customer list count: {result.Count}");
-            _logger.LogInformation($"Get customer list: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var customers = await _customerService.GetCustomers();
+
+            if (customers.Count <= 0) return NotFound();
+
+            _logger.LogInformation($"Get customer list count: {customers.Count}");
+            _logger.LogInformation($"Get customer list: {JsonConvert.SerializeObject(customers)}");
+            return Ok(customers);
+
         }
 
         // GET api/<CustomerController>/5
         [HttpGet("{id}")]
-        public async Task<Customer> Get(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Customer))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
         {
-            var result = await _customerService.GetCustomer(id);
-            _logger.LogInformation($"Get customer by id: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var customer = await _customerService.GetCustomer(id);
+
+            if (customer == null) return NotFound();
+            _logger.LogInformation($"Get customer by id: {JsonConvert.SerializeObject(customer)}");
+            return Ok(customer);
+
         }
 
         // POST api/<CustomerController>
         [HttpPost]
-        public async Task<Customer> Post([FromBody] CustomerDto customer)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Customer))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Post([FromBody] CustomerDto customer)
         {
-            var result = await _customerService.AddCustomer(customer);
-            _logger.LogInformation($"Post customer: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var createdCustomer = await _customerService.AddCustomer(customer);
+            if (createdCustomer == null) return BadRequest();
+
+            _logger.LogInformation($"Post customer: {JsonConvert.SerializeObject(createdCustomer)}");
+            return StatusCode(StatusCodes.Status201Created, createdCustomer);
+
         }
 
         // PUT api/<CustomerController>/5
         [HttpPut("{id}")]
-        public async Task<Customer?> Put(int id, [FromBody] CustomerDto customer)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Customer))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Put(int id, [FromBody] CustomerDto customer)
         {
             var updatedCustomer = await _customerService.UpdateCustomer(id, customer);
-            _logger.LogInformation($"Put customer: {JsonConvert.SerializeObject(updatedCustomer)}");
+                if (updatedCustomer == null) return BadRequest();
 
-            return updatedCustomer;
+            _logger.LogInformation($"Put customer: {JsonConvert.SerializeObject(updatedCustomer)}");
+            return Ok(updatedCustomer);
+
         }
 
         // DELETE api/<CustomerController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> Delete(int id)
         {
             await _customerService.DeleteCustomer(id);
             _logger.LogInformation($"Customer Deleted id:{id}");
+            return Ok();
         }
     }
 }

@@ -157,7 +157,7 @@ namespace DemoProject.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateOrder_throws_exception()
+        public async Task UpdateOrder_returns_null()
         {
             //Arrange
             OrderDto updateOrderDto = new()
@@ -168,10 +168,10 @@ namespace DemoProject.Tests.Services
             _orderRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).Throws(new Exception());
 
             //Act
-            Func<Task> sut = async () => await _orderService.UpdateOrder(1, updateOrderDto);
+            var sut =  await _orderService.UpdateOrder(1, updateOrderDto);
 
             //Assert
-            await sut.Should().ThrowAsync<Exception>();
+            sut.Should().BeNull();
 
             _loggerMock.Verify(x => x.Log(LogLevel.Error,
                 It.IsAny<EventId>(),

@@ -11,8 +11,8 @@ namespace DemoProject.ApplicationCore.Interfaces
     public interface IOrderService
     {
         Task<List<Order>> GetOrders();
-        Task<Order> GetOrder(int id);
-        Task<Order> AddOrder(OrderDto order);
+        Task<Order?> GetOrder(int id);
+        Task<Order?> AddOrder(OrderDto order);
         Task<Order?> UpdateOrder(int id, OrderDto order);
         Task DeleteOrder(int id);
     }

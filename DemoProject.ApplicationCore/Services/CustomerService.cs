@@ -25,11 +25,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return  new List<Customer>();
             }
         }
 
-        public async Task<Customer> GetCustomer(int id)
+        public async Task<Customer?> GetCustomer(int id)
         {
             try
             {
@@ -38,11 +38,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
-        public async Task<Customer> AddCustomer(CustomerDto customer)
+        public async Task<Customer?> AddCustomer(CustomerDto customer)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
@@ -73,7 +73,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 

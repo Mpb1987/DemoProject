@@ -23,47 +23,66 @@ namespace DemoProject.Api.Controllers
 
         // GET: api/<ProductController>
         [HttpGet]
-        public async Task<List<Product>> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Product>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
         {
-            var result = await _productService.GetProducts();
-            _logger.LogInformation($"Get Product list count: {result.Count}");
-            _logger.LogInformation($"Get Product list: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var products = await _productService.GetProducts();
+
+            if (products.Count <= 0) return NotFound();
+            
+            _logger.LogInformation($"Get Product list count: {products.Count}");
+            _logger.LogInformation($"Get Product list: {JsonConvert.SerializeObject(products)}");
+            return Ok(products);
         }
 
         // GET api/<ProductController>/5
         [HttpGet("{id}")]
-        public async Task<Product> Get(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
         {
-            var result = await _productService.GetProduct(id);
-            _logger.LogInformation($"Get Product by id: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var product = await _productService.GetProduct(id);
+            if (product == null) return NotFound();
+
+            _logger.LogInformation($"Get Product by id: {JsonConvert.SerializeObject(product)}");
+            return Ok(product);
         }
 
         // POST api/<ProductController>
         [HttpPost]
-        public async Task<Product> Post([FromBody] string description)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Post([FromBody] string description)
         {
-            var result = await _productService.AddProduct(description);
-            _logger.LogInformation($"Post Product: {JsonConvert.SerializeObject(result)}");
-            return result;
+            var product = await _productService.AddProduct(description);
+
+            if(product ==null) return NotFound();
+
+            _logger.LogInformation($"Post Product: {JsonConvert.SerializeObject(product)}");
+            return StatusCode(StatusCodes.Status201Created, product);
         }
 
         // PUT api/<ProductController>/5
         [HttpPut("{id}")]
-        public async Task<Product?> Put(int id, [FromBody] string description)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Put(int id, [FromBody] string description)
         {
             var updatedProduct = await _productService.UpdateProduct(id, description);
+            if (updatedProduct == null) return BadRequest();
+
             _logger.LogInformation($"Put Product: {JsonConvert.SerializeObject(updatedProduct)}");
-            return updatedProduct;
+            return Ok(updatedProduct);
         }
 
         // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             await _productService.DeleteProduct(id);
             _logger.LogInformation($"Product Deleted id:{id}");
+            return Ok();
         }
     }
 }

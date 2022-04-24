@@ -124,7 +124,7 @@ namespace DemoProject.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateCustomer_throws_exception()
+        public async Task UpdateCustomer_returns_null()
         {
             //Arrange
             CustomerDto updateCustomerDto = new()
@@ -135,10 +135,10 @@ namespace DemoProject.Tests.Services
             _customerRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>())).Throws(new Exception());
 
             //Act
-            Func<Task> sut = async () => await _customerService.UpdateCustomer(1, updateCustomerDto);
+            var sut = await _customerService.UpdateCustomer(1, updateCustomerDto);
 
             //Assert
-            await sut.Should().ThrowAsync<Exception>();
+            sut.Should().BeNull();
 
             _loggerMock.Verify(x => x.Log(LogLevel.Error,
                 It.IsAny<EventId>(),

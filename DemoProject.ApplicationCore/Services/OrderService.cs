@@ -11,7 +11,7 @@ namespace DemoProject.ApplicationCore.Services
         private readonly IBaseRepository<Order> _orderRepository;
         private readonly IBaseRepository<Customer> _customerRepository;
         private readonly IBaseRepository<Product> _productRepository;
-        
+
         public OrderService(ILogger<OrderService> logger,
             IBaseRepository<Order> orderRepository,
             IBaseRepository<Customer> customerRepository,
@@ -32,11 +32,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return new List<Order>();
             }
         }
 
-        public async Task<Order> GetOrder(int id)
+        public async Task<Order?> GetOrder(int id)
         {
             try
             {
@@ -46,11 +46,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
-        public async Task<Order> AddOrder(OrderDto order)
+        public async Task<Order?> AddOrder(OrderDto order)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
@@ -94,7 +94,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 

@@ -30,11 +30,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return  new List<Product>();
             }
         }
 
-        public async Task<Product> GetProduct(int id)
+        public async Task<Product?> GetProduct(int id)
         {
             try
             {
@@ -43,11 +43,11 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return  null;
             }
         }
 
-        public async Task<Product> AddProduct(string productDescription)
+        public async Task<Product?> AddProduct(string productDescription)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
@@ -77,7 +77,7 @@ namespace DemoProject.ApplicationCore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                throw;
+                return null;
             }
         }
 
